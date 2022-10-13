@@ -1,0 +1,11 @@
+#!/bin/bash
+
+module=$(pwd | sed -e 's|^\(.*\Documents/\)||g' -e 's|\/\(.*\)$||g')
+week=$(pwd | sed -e 's|^\(.*\week\)||g' -e 's|\/\(.*\)$||g')
+
+#format for ca282
+[[ "$module" == "ca282" ]] && week=$(printf "%02d" "$week") && week="-${week}"
+
+#open either the labsheet or einstein in google chrome
+[ "$*" ] && google-chrome "https://${module}.computing.dcu.ie/einstein/report.html?user=${USER}" || google-chrome "https://${module}.computing.dcu.ie/labsheet${week}.html"
+	

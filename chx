@@ -1,0 +1,5 @@
+#!/bin/sh
+
+last_file=$(ls ./ -rt | tail -1)
+
+chmod +x $last_file

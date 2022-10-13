@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# variable initilisation
+filename="$1"
+language=$(echo $filename | sed -e 's|^\(.*\.\)||g')
+
+# get the right suffix for the date
+DaySuffix() {
+  case `date +%d` in
+    1|21|31) echo "st";;
+    2|22)    echo "nd";;
+    3|23)    echo "rd";;
+    *)       echo "th";;
+  esac
+}
+
+#format the date
+today=$(date +"Date created: %R on %A, the %d`DaySuffix` of %B, %Y.") # All other dates
+
+touch "$filename" # create the file
+
+# if the language is c, fill the file with c stuff
+[[ "$language" == "c" ]] && echo -e "/* \nFilename: $filename \nDescription: $2 \nAuthor: $USER \n$today \n*/ \n\n//include necessary libraries\n#include <string.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char *argv[])\n{\n\n\treturn 0;\n}" > "$filename"
+[[ "$language" == "py" ]] && echo -e "/* \nFilename: $filename \nDescription: $2 \nAuthor: $USER \n$today \n*/ \n\n#!/usr/bin python3" > "$filename"
+
+# open the file in sublime
+subl "$filename"
