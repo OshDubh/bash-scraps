@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # variable initilisation
+# Command syntax:
+# subl_create [filename] "[description]"
+# supports c and python
+
 filename="$1"
 language=$(echo $filename | sed -e 's|^\(.*\.\)||g')
 
@@ -19,9 +23,9 @@ today=$(date +"Date created: %R on %A, the %d`DaySuffix` of %B, %Y.") # All othe
 
 touch "$filename" # create the file
 
-# if the language is c, fill the file with c stuff
-[[ "$language" == "c" ]] && echo -e "/* \nFilename: $filename \nDescription: $2 \nAuthor: $USER \n$today \n*/ \n\n//include necessary libraries\n#include <string.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char *argv[])\n{\n\n\treturn 0;\n}" > "$filename"
-[[ "$language" == "py" ]] && echo -e "/* \nFilename: $filename \nDescription: $2 \nAuthor: $USER \n$today \n*/ \n\n#!/usr/bin python3" > "$filename"
+# Fill the file with the right stuff for the right file
+[[ "$language" == "c" ]] && echo -e "/* \nFilename: $filename \nDescription: $2 \nAuthor: $USER \n$today \n*/ \n\n//include necessary libraries\n#include <string.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char *argv[])\n{\n\n\n\n\treturn 0;\n}" > "$filename"
+[[ "$language" == "py" ]] && echo -e "#Filename: $filename \n#Description: $2 \n#Author: $USER \n#$today \n\n#!/usr/bin python3" > "$filename"
 
 # open the file in sublime
 subl "$filename"
