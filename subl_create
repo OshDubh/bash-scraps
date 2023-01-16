@@ -26,7 +26,7 @@ today=$(date +"Date created: %R on %A, the %d`DaySuffix` of %B, %Y.") # All othe
 touch "$filename" # create the file
 
 # Fill the file with the right stuff for the right file
-cat ~/bin/${language}_template.txt >> $filename
+cat ~/bin/template_${language}.txt >> $filename
 
 # replace the template variables with the actual variables
 sed -i "s|_filename_|$filename|g" $filename
