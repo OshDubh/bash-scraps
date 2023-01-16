@@ -1,0 +1,17 @@
+/* 
+Filename: _filename_
+Description: _description_
+Author: _user_ 
+Date created: _date_
+*/ 
+
+// import neccessary libraries
+import java.util.Scanner;
+
+public class _title_
+{
+	public static void main(String args[])
+	{
+		
+	}
+}
