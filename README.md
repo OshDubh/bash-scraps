@@ -12,6 +12,6 @@ A collection of bash scripts to make life easier
 
 `ppx` Runs the last edited python file.
 
-`subl_create` Creates a file given in cli argument 1, and fills it with standard boilerplate code. The boilerplate code follows the format of the template matching the file extension. template files should be in the format `template_[suffix]`. Any language is supported by `subl_create` as long as there is a matching template file. The template files should be stored in `~/bin`.
+`subl_create` Creates a file given in cli argument 1, and fills it with standard boilerplate code. The boilerplate code follows the format of the template matching the file extension. template files should be in the format `template_[suffix]`. Any language is supported by `subl_create` as long as there is a matching template file. If there is no matching template file, running `subl_create` will give an error but still opens a correctly titled file in sublime text. The template files should be stored in `~/bin`.
 
 `jccx` compiles and executes the last java file edited.
