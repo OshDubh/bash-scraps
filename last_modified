@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Changes the "last modified" line in a file whenever it is saved
+
+look_for="Last modified:" # the line to search for. Replace this with your own string
+
+# a function that gets and modifies the last edited file to update the date
+program () {
+    file=$(ls -t | head -n 1)  # get the last modified file
+    line=$(cat $file | grep "$look_for") # get the line with the look_for string
+    line_date=$(echo "$line" | sed -e "s|$look_for||g") # get the date from the line
+
+    # get the string for the current date and time
+    DaySuffix() {
+    case `date +%d` in
+        01|21|31) echo "st";;
+        02|22)    echo "nd";;
+        03|23)    echo "rd";;
+        *)       echo "th";;
+    esac
+    }
+    today=$(date +"%R on %A, the %d`DaySuffix` of %B, %Y.") #format the date
+    new_line="$look_for $today" # create the new line
+
+    sed -i "s|$line|$new_line|g" $file # replace the line with the new date
+}
+
+# execute this program when a file changes
+loop () {
+    while true;
+    do
+        watch -d -t -g ls -lR && program
+    done
+}
+
+loop
