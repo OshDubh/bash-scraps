@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Filename: create [Not hardcoded, change the filename to what you want the command to be called]
+# Description: Creates a new file from a template and opens it in visual studio code.
+
+# function name: show_help_message
+# description: echoes the help for this script
+show_help_message ()
+{
+  local script_name=$(basename $0) # get the name of the script in case the user has renamed it
+
+  echo -e "Usage: $script_name <filename> [description]\n"
+  echo -e "Description:\n\tCreates a new file from a template and opens it in $preffered_editor."
+  
+  exit 1
+}
+
+# function name: get_day_suffix
+# description: returns the suffix for the current day number
+get_day_suffix ()
+{
+  local day=$(date +%d) # get the day number
+  local suffix="th" # default suffix
+
+  # change for special cases (we only need to check the last digit)
+  case "${day: -1}"
+  in
+    1) suffix="st";;
+    2) suffix="nd";;
+    3) suffix="rd";;
+  esac
+
+  echo $suffix # return the suffix
+}
+
+preffered_editor="code" # the preffered editor to open the file in
+today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+
+# extract the file details from the arguments
+filename="$1" # the filename, including suffix
+language=$(echo $filename | sed -e 's|^\(.*\.\)||g') # the file suffix (everything after the ".")
+title=$(echo $filename | sed -e 's|\.[^.]*$||g') # the filename without the suffix or the "."
+
+[[ -z "$1" ]] && show_help_message # echo the help if no arguments are given
+
+touch "$filename" # create the file
+cat ~/bin/template_${language}.txt >> $filename # append the right template to the file
+
+# replace the template variables with the actual variables
+sed -i "s|_filename_|$filename|g" $filename
+sed -i "s|_title_|$title|g" $filename
+sed -i "s|_description_|$2|g" $filename
+sed -i "s|_user_|$USER|g" $filename
+sed -i "s|_date_|$today|g" $filename
+
+# open the file in sublime
+$preffered_editor "$filename"
