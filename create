@@ -9,7 +9,7 @@ show_help_message ()
 {
   local script_name=$(basename $0) # get the name of the script in case the user has renamed it
 
-  echo -e "Usage: $script_name <filename> [description]\n"
+  echo -e "Usage: \n\t$script_name <filename> [description]\n"
   echo -e "Description:\n\tCreates a new file from a template and opens it in $preffered_editor."
   
   exit 1
@@ -22,13 +22,15 @@ get_day_suffix ()
   local day=$(date +%d) # get the day number
   local suffix="th" # default suffix
 
-  # change for special cases (we only need to check the last digit)
-  case "${day: -1}"
-  in
-    1) suffix="st";;
-    2) suffix="nd";;
-    3) suffix="rd";;
-  esac
+  # change for special cases
+  if [[ "$day" != 11 && "$day" != 12 && "$day" != 13 ]]; then
+    case "$day"
+    in
+      1|21|31) suffix="st";;
+      2|22) suffix="nd";;
+      3|23) suffix="rd";;
+    esac
+  fi
 
   echo $suffix # return the suffix
 }
