@@ -9,9 +9,7 @@ show_help_message ()
 {
   cat << EOF
 Usage: create [OPTIONS] FILENAME [DESCRIPTION]
-
-Creates a new file with the specified FILENAME and appends the appropriate template.
-
+Creates a new file with the specified FILENAME and appends the appropriate template
 DESCRIPTION is an optional argument that can be used to provide a brief description of the file.
 
 Options:
@@ -65,6 +63,7 @@ today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get
 filename="$1" # the filename, including suffix
 language=$(echo $filename | sed -e 's|^\(.*\.\)||g') # the file suffix (everything after the ".")
 title=$(echo $filename | sed -e 's|\.[^.]*$||g') # the filename without the suffix or the "."
+description="$2" # the description of the file
 
 [[ -z "$1" ]] && show_help_message # echo the help if no arguments are given
 
@@ -74,7 +73,7 @@ cat ~/bin/template_${language}.txt >> $filename # append the right template to t
 # replace the template variables with the actual variables
 sed -i "s|_filename_|$filename|g" $filename
 sed -i "s|_title_|$title|g" $filename
-sed -i "s|_description_|$2|g" $filename
+sed -i "s|_description_|$description|g" $filename
 sed -i "s|_user_|$USER|g" $filename
 sed -i "s|_date_|$today|g" $filename
 
