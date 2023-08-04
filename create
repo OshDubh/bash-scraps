@@ -24,11 +24,10 @@ get_day_suffix ()
 
   # change for special cases
   if [[ "$day" != 11 && "$day" != 12 && "$day" != 13 ]]; then
-    case "$day"
-    in
-      1|21|31) suffix="st";;
-      2|22) suffix="nd";;
-      3|23) suffix="rd";;
+    case ${day: -1} in # get the last digit of the day number
+      1) suffix="st";;
+      2) suffix="nd";;
+      3) suffix="rd";;
     esac
   fi
 
