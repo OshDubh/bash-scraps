@@ -1,18 +1,33 @@
 #!/bin/bash
 
-# Filename: create [Not hardcoded, change the filename to what you want the command to be called]
+# Filename: create
 # Description: Creates a new file from a template and opens it in visual studio code.
 
 # function name: show_help_message
-# description: echoes the help for this script
+# description: displays the help message for the create script
 show_help_message ()
 {
-  local script_name=$(basename $0) # get the name of the script in case the user has renamed it
+  cat << EOF
+Usage: create [OPTIONS] FILENAME [DESCRIPTION]
 
-  echo -e "Usage: \n\t$script_name <filename> [description]\n"
-  echo -e "Description:\n\tCreates a new file from a template and opens it in $preffered_editor."
-  
-  exit 1
+Creates a new file with the specified FILENAME and appends the appropriate template.
+
+DESCRIPTION is an optional argument that can be used to provide a brief description of the file.
+
+Options:
+  -h, --help      Display this help message and exit.
+  -e, --editor    Set the preferred editor to open the file in. Default is "nano".
+  -l, --list      List the available templates.
+  -t, --template  Create a new template.
+  -x, --last      Use the last modified file that matches a template.
+
+Examples:
+  create myscript.py
+  create hello.py "my first python script, now with 100% more description!"
+  create -e subl myscript.py
+EOF
+
+  exit 0
 }
 
 # function name: get_day_suffix
@@ -34,7 +49,16 @@ get_day_suffix ()
   echo $suffix # return the suffix
 }
 
-preffered_editor="code" # the preffered editor to open the file in
+# TODO: flags support using getopts
+  # flags: 
+    # -h for help, 
+    # -e to specify the editor,
+    # -l to list the available templates
+    # -t to create a new template
+    # -x to not require a filename and instead uses the last modified one that matches a template
+  # error if no matching template is found
+
+preffered_editor="nano" # the preffered editor to open the file in
 today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
 
 # extract the file details from the arguments
