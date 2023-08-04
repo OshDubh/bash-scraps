@@ -14,10 +14,11 @@ DESCRIPTION is an optional argument that can be used to provide a brief descript
 
 Options:
   -h, --help      Display this help message and exit.
-  -e, --editor    Set the preferred editor to open the file in. Default is "nano".
+  -e, --editor    Specify the preferred editor to open the file in. Default is "nano".
   -l, --list      List the available templates.
   -t, --template  Create a new template.
-  -x, --last      Use the last modified file that matches a template.
+  -x, --last      Use the last modified file that matches a template instead of requiring a filename.
+  -c, --config    Configure the script.
 
 Examples:
   create myscript.py
@@ -54,6 +55,9 @@ get_day_suffix ()
     # -l to list the available templates
     # -t to create a new template
     # -x to not require a filename and instead uses the last modified one that matches a template
+    # -c to configure the script
+      # this will create a config file in the home directory that will store the preffered editor and the path to the templates directory. 
+      # the script will look for this file and use the values in it if it exists, otherwise it will use the default values. 
   # error if no matching template is found
 
 preffered_editor="nano" # the preffered editor to open the file in
