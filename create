@@ -48,6 +48,15 @@ get_day_suffix ()
   echo $suffix # return the suffix
 }
 
+# function name: list_templates
+# description: displays the list of available templates that exist in the same directory as the script
+list_templates ()
+{
+  echo "Available templates:"
+  ls ~/bin/template_*.txt | sed -e 's|.*template_\(.*\)\.txt|\1|g'
+  echo "Use the -t flag to create a new template."
+}
+
 # TODO: flags support using getopts
   # flags: 
     # -h for help, 
@@ -62,6 +71,31 @@ get_day_suffix ()
 
 preffered_editor="nano" # the preffered editor to open the file in
 today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+
+# parse the flags using getopts, exit after every flag
+while getopts "hle:" opt;
+do
+  case $opt in
+    h)
+      show_help_message
+      exit 0
+      ;;
+    l)
+      list_templates
+      exit 0
+      ;;
+    e)
+      preferred_editor="$OPTARG"
+      ;;
+    *)
+      echo "Error: unrecognized option -$opt" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# shift the processed options out of the argument list
+shift $((OPTIND - 1))
 
 # extract the file details from the arguments
 filename="$1" # the filename, including suffix
