@@ -13,12 +13,11 @@ Creates a new file with the specified FILENAME and appends the appropriate templ
 DESCRIPTION is an optional argument that can be used to provide a brief description of the file.
 
 Options:
-  -h, --help      Display this help message and exit.
-  -e, --editor    Specify the preferred editor to open the file in. Default is "nano".
-  -l, --list      List the available templates.
-  -t, --template  Create a new template.
-  -x, --last      Use the last modified file that matches a template instead of requiring a filename.
-  -c, --config    Configure the script.
+  -h    Display this help message and exit.
+  -e    Specify the preferred editor to open the file in. Default is "nano".
+  -l    List the available templates.
+  -t    Create a new template.
+  -c    Configure the script.
 
 Examples:
   create myscript.py
@@ -52,9 +51,18 @@ get_day_suffix ()
 # description: displays the list of available templates that exist in the same directory as the script
 list_templates ()
 {
+  local script_location=$(dirname "$0")  # get the location of the script 
+  local templates=$(ls $script_location/template_*.txt) # get the list of templates
+
+  # print the list of templates
   echo "Available templates:"
-  ls ~/bin/template_*.txt | sed -e 's|.*template_\(.*\)\.txt|\1|g'
-  echo "Use the -t flag to create a new template."
+  for template in $templates;
+  do
+    echo " - $(basename $template | sed -e 's|template_||g' -e 's|\.txt||g')"
+  done
+
+  echo -e "\nUse the -t flag to create a new template."
+  exit 0
 }
 
 # TODO: flags support using getopts
@@ -63,32 +71,29 @@ list_templates ()
     # -e to specify the editor,
     # -l to list the available templates
     # -t to create a new template
-    # -x to not require a filename and instead uses the last modified one that matches a template
     # -c to configure the script
       # this will create a config file in the home directory that will store the preffered editor and the path to the templates directory. 
       # the script will look for this file and use the values in it if it exists, otherwise it will use the default values. 
   # error if no matching template is found
 
-preffered_editor="nano" # the preffered editor to open the file in
+preffered_editor="code" # the preffered editor to open the file in
 today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
 
 # parse the flags using getopts, exit after every flag
-while getopts "hle:" opt;
+while getopts ":hle" opt;
 do
   case $opt in
     h)
-      show_help_message
-      exit 0
+      echo "help"
       ;;
     l)
-      list_templates
-      exit 0
+      echo "list"
       ;;
     e)
-      preferred_editor="$OPTARG"
+      echo "editor"
       ;;
     *)
-      echo "Error: unrecognized option -$opt" >&2
+      echo -e "Not a valid flag!\n\nValid options:\n -h for help\n -l to list the available template.\n -e to specify the preferred editor.\n -t to create a new template.\n -c to configure the script."
       exit 1
       ;;
   esac
