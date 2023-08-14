@@ -65,6 +65,83 @@ list_templates ()
   exit 0
 }
 
+# name: create_template
+# description: guides the user through creating a new template and saves it in the same directory as the script
+create_template ()
+{
+  echo "Welcome to the template creator."
+  echo "This script will guide you through creating a new template."
+  echo -e "First, enter the file suffix of the language you want the template to be for.\nExample: "py" for python, "js" for javascript, etc..."
+  
+  # get the file suffix input, and keep asking for it until it passes the validation
+  local suffix=""
+  local filename="" # the name of the template file, for opening in the editor
+  local script_location=$(dirname "$0")  # get the location of the script 
+  local file_exists=false # flag to check if the file already exists
+
+  while [[ -z "$suffix" ]];
+  do
+    echo "" # whitespace for separation
+    read -p "File suffix: " suffix # get the file suffix
+
+    # validation
+    [[ -z "$suffix" ]] && echo "Error: No file suffix provided" # check that a suffix was entered
+    [[ $suffix == .* ]] && suffix="${suffix:1}" # remove the leading full stop if it exists
+    [[ "$suffix" =~ [^a-zA-Z0-9] ]] && echo "Error: not a valid suffix" && suffix="" # check that the suffix is alphanumeric
+    [[ -f "$script_location/template_$suffix.txt" ]] && echo "Error: template already exists. Opening existing template..." && file_exists=true
+    [[ -z "$filename" ]] && filename="template_$suffix.txt" # set the filename if it hasn't been set yet
+  done
+
+  [[ $file_exists == true ]] && $preffered_editor "$script_location/template_$suffix.txt" && exit 0 # open the existing template if it exists
+
+  # create the new template and paste all template lines into it, below
+  cat << EOF >> "$script_location/template_$suffix.txt"
+Welcome to create's template creator. 
+Just add content below the #'s to create a new template. This header text will be removed after you close the file.
+
+Use variables for the content you want create to add automatically. These variables will be changed when you use create to generate a file. 
+Supported variables
+_filename_      : will be replaced by the name of the file you just created, e.g. "helloworld.py".
+_title_         : will be replaced by the name of the file without the file suffix, eg "helloworld".
+_description_   : will be replaced by the description you gave to create, e.g. "this is create's second argument".
+_user_          : will be replaced by the current user, taken from your command-line environment, e.g "OshDubh".
+_date_          : will be replaced by the date the file was created, e.g. "09:41 on Sunday, the 24th of September, 2023".
+
+
+Possible example for a python file:
+
+# Filename: _filename_
+# Title: _title_
+# Description: _description_
+# Author: _user_
+# Date created: _date
+
+#!/usr/bin python3
+
+# main function
+if __name__ == "__main__":
+
+### end of template ###
+EOF
+
+  $preffered_editor "$script_location/template_$suffix.txt" # open the template in the editor
+
+  # wait for the file to be saved by checking the modification time
+  echo "Waiting for the template file to be saved before continuing..."
+  local last_modified=$(stat -c %Y "$script_location/template_$suffix.txt")
+  local current_time=$(date +%s)
+  while [[ "$last_modified" -eq "$current_time" ]];
+  do
+    sleep 1
+    last_modified=$(stat -c %Y "$script_location/template_$suffix.txt")
+  done
+
+  # remove the header text, starting at line one and ending at the line that matches, deleting the entire range
+  sed -i '1,/### end of template ###/d' "$script_location/template_$suffix.txt"
+  echo "Template created successfully!" 
+
+}
+
 # TODO: flags support using getopts
   # flags: 
     # -h for help, 
@@ -72,28 +149,39 @@ list_templates ()
     # -l to list the available templates
     # -t to create a new template
     # -c to configure the script
-      # this will create a config file in the home directory that will store the preffered editor and the path to the templates directory. 
-      # the script will look for this file and use the values in it if it exists, otherwise it will use the default values. 
   # error if no matching template is found
 
 preffered_editor="code" # the preffered editor to open the file in
 today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
 
 # parse the flags using getopts, exit after every flag
-while getopts ":hle" opt;
-do
+# check that only one flag was provided
+if [[ "$OPTIND" -gt 2 ]]; then
+  echo "Error: only one flag can be used at a time" >&2
+  show_help_message
+  exit 1
+fi
+
+while getopts ":hlet" opt; do
   case $opt in
     h)
-      echo "help"
+      show_help_message
+      exit
       ;;
     l)
-      echo "list"
+      list_templates
+      exit
       ;;
     e)
-      echo "editor"
+      preferred_editor="$OPTARG"
+      ;;
+    t)
+      create_template
+      exit
       ;;
     *)
-      echo -e "Not a valid flag!\n\nValid options:\n -h for help\n -l to list the available template.\n -e to specify the preferred editor.\n -t to create a new template.\n -c to configure the script."
+      echo "Error: unrecognized option -$opt" >&2
+      show_help_message
       exit 1
       ;;
   esac
