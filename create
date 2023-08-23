@@ -2,6 +2,8 @@
 
 # Filename: create
 # Description: Creates a new file from a template and opens it in visual studio code.
+# Author: OshDubh
+
 
 # function name: show_help_message
 # description: displays the help message for the create script
@@ -106,6 +108,7 @@ _title_         : will be replaced by the name of the file without the file suff
 _description_   : will be replaced by the description you gave to create, e.g. "this is create's second argument".
 _user_          : will be replaced by the current user, taken from your command-line environment, e.g "OshDubh".
 _date_          : will be replaced by the date the file was created, e.g. "09:41 on Sunday, the 24th of September, 2023".
+_last_modified_ : will be replaced by the date the file was last modified if create was run with the flag to update dates live.
 
 
 Possible example for a python file:
@@ -115,6 +118,7 @@ Possible example for a python file:
 # Description: _description_
 # Author: _user_
 # Date created: _date
+# Last modified: _last_modified_
 
 #!/usr/bin python3
 
@@ -150,9 +154,12 @@ EOF
     # -t to create a new template
     # -c to configure the script
   # error if no matching template is found
+  # update the help message formatting to be more unix-standard
+    # see usermod for a good example on how it should look
+  # specify which template to use
 
-preffered_editor="code" # the preffered editor to open the file in
-today=$(date +"Date created: %R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+preffered_editor="code" # where we will store the preferred editor
+today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
 
 # parse the flags using getopts, exit after every flag
 # check that only one flag was provided
@@ -162,8 +169,9 @@ if [[ "$OPTIND" -gt 2 ]]; then
   exit 1
 fi
 
-while getopts ":hlet" opt; do
-  case $opt in
+while getopts :hle:t name;
+do
+  case $name in
     h)
       show_help_message
       exit
@@ -173,7 +181,8 @@ while getopts ":hlet" opt; do
       exit
       ;;
     e)
-      preferred_editor="$OPTARG"
+      preferred_editor=$OPTARG
+      echo "Preferred editor set to $preferred_editor"
       ;;
     t)
       create_template
@@ -186,17 +195,15 @@ while getopts ":hlet" opt; do
       ;;
   esac
 done
+shift $(($OPTIND -1))
 
-# shift the processed options out of the argument list
-shift $((OPTIND - 1))
+[[ -z "$1" ]] && show_help_message # echo the help if no arguments are given
 
 # extract the file details from the arguments
 filename="$1" # the filename, including suffix
 language=$(echo $filename | sed -e 's|^\(.*\.\)||g') # the file suffix (everything after the ".")
 title=$(echo $filename | sed -e 's|\.[^.]*$||g') # the filename without the suffix or the "."
 description="$2" # the description of the file
-
-[[ -z "$1" ]] && show_help_message # echo the help if no arguments are given
 
 touch "$filename" # create the file
 cat ~/bin/template_${language}.txt >> $filename # append the right template to the file
@@ -207,6 +214,7 @@ sed -i "s|_title_|$title|g" $filename
 sed -i "s|_description_|$description|g" $filename
 sed -i "s|_user_|$USER|g" $filename
 sed -i "s|_date_|$today|g" $filename
+sed -i "s|_last_modified_|$today|g" $filename
 
-# open the file in sublime
+# open the file in the editor
 $preffered_editor "$filename"
