@@ -1,36 +1,52 @@
 #!/bin/bash
 
+# Filename: last_modified
+# Description: Changes the "last modified" line in a file whenever it is saved
+# Author: OshDubh
+
 # Changes the "last modified" line in a file whenever it is saved
 
-look_for="Last modified:" # the line to search for. Replace this with your own string
+# function name: get_day_suffix
+# description: returns the suffix for the current day number
+get_day_suffix ()
+{
+  local day=$(date +%d) # get the day number
+  local suffix="th" # default suffix
 
-# a function that gets and modifies the last edited file to update the date
-program () {
-    file=$(ls -t | head -n 1)  # get the last modified file
-    line=$(cat $file | grep "$look_for") # get the line with the look_for string
-    line_date=$(echo "$line" | sed -e "s|$look_for||g") # get the date from the line
-
-    # get the string for the current date and time
-    DaySuffix() {
-    case `date +%d` in
-        01|21|31) echo "st";;
-        02|22)    echo "nd";;
-        03|23)    echo "rd";;
-        *)       echo "th";;
+  # change for special cases
+  if [[ "$day" != 11 && "$day" != 12 && "$day" != 13 ]]; then
+    case ${day: -1} in # get the last digit of the day number
+      1) suffix="st";;
+      2) suffix="nd";;
+      3) suffix="rd";;
     esac
-    }
-    today=$(date +"%R on %A, the %d`DaySuffix` of %B, %Y.") #format the date
-    new_line="$look_for $today" # create the new line
+  fi
 
-    sed -i "s|$line|$new_line|g" $file # replace the line with the new date
+  echo $suffix # return the suffix
 }
 
-# execute this program when a file changes
-loop () {
-    while true;
-    do
-        watch -d -t -g ls -lR && program
-    done
+# funciton name: program
+# description: the main loop that constantly runs
+program ()
+{
+    # get the info we need
+    file="$(ls -t | head -n 1)"  # get the last modified file
+    suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
+    script_location=$(dirname "$0")  # get the location of the script 
+    [[ -f "$script_location/template_$suffix.txt" ]] || echo "No template exists for the last modified file." || exit
+
+    line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
+    [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit
+
+    today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+    
+    sed -i "s|${line}.*$|${line}${today}|" $file # replace the last modified time with the current last modified info
 }
 
-loop
+# # execute this program when a file changes
+while true;
+do
+    watch -d -t -g ls -lR && program
+done
+
+program
