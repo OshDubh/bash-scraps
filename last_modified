@@ -4,8 +4,6 @@
 # Description: Changes the "last modified" line in a file whenever it is saved
 # Author: OshDubh
 
-# Changes the "last modified" line in a file whenever it is saved
-
 # function name: get_day_suffix
 # description: returns the suffix for the current day number
 get_day_suffix ()
@@ -39,7 +37,6 @@ program ()
     [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit
 
     today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
-    
     sed -i "s|${line}.*$|${line}${today}|" $file # replace the last modified time with the current last modified info
 }
 
