@@ -1,18 +1,32 @@
 /*
-Filename: _filename_
-Description: _description_
-Author: _user_
-Date created: _date_
-Last modified: _last_modified_
-*/
+ * Filename: _filename_
+ * Description: _description_
+ * Author: _user_
+ * Date created: _date_
+ * Last modified: _last_modified_
+ */
 
 //include necessary libraries
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+// function declaration
+ftype _title_(atype aname); 
+
 int main(int argc, char *argv[])
 {
 
 	return 0;
+}
+
+// name: _title_
+// arguments: atype aname
+// returns: ftype
+// description: 
+ftype _title_(atype aname)
+{
+
+
+	return
 }
