@@ -4,3 +4,6 @@ last_file=$(ls ./ -rt | tail -1)
 trimmed_file=$(echo $last_file | sed 's|\.c||g')
 
 gcc -o "$trimmed_file" "$last_file"
+
+# execute the executable with the args passed to this script
+./"$trimmed_file" "$@"
