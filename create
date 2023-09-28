@@ -141,7 +141,7 @@ EOF
   done
 
   # remove the header text, starting at line one and ending at the line that matches, deleting the entire range
-  sed -i'' '1,/### end of template ###/d' "$script_location/template_$suffix.txt"
+  sed -i"._createbackup" '1,/### end of template ###/d' "$script_location/template_$suffix.txt"
   echo "Template created successfully!" 
 
 }
