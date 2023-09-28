@@ -152,6 +152,12 @@ EOF
 delete_old_backups ()
 {
   local script_location=$(dirname "$0")  # get the location of the script 
+
+  #  check if any backup files exist
+  if [[ ! -f "$script_location/*._createbackup.*.txt" ]]; then
+    return 0
+  fi
+  
   local backups=$(ls $script_location/*._createbackup.*.txt) # get the list of backups
 
   # iterate over all the backups 
