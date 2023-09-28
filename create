@@ -209,12 +209,12 @@ touch "$filename" # create the file
 cat ~/bin/template_${language}.txt >> $filename # append the right template to the file
 
 # replace the template variables with the actual variables
-sed -i "s|_filename_|$filename|g" $filename
-sed -i "s|_title_|$title|g" $filename
-sed -i "s|_description_|$description|g" $filename
-sed -i "s|_user_|$USER|g" $filename
-sed -i "s|_date_|$today|g" $filename
-sed -i "s|_last_modified_|$today|g" $filename
+sed -i"._createbackup" "s|_filename_|$filename|g" "$filename"
+sed -i"._createbackup" "s|_title_|$title|g" $filename
+sed -i"._createbackup" "s|_description_|$description|g" "$filename"
+sed -i"._createbackup" "s|_user_|$USER|g" "$filename"
+sed -i"._createbackup" "s|_date_|$today|g" "$filename"
+sed -i"._createbackup" "s|_last_modified_|$today|g" "$filename"
 
 # open the file in the editor
 $preffered_editor "$filename"
