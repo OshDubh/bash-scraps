@@ -146,6 +146,27 @@ EOF
 
 }
 
+# name: delete_old_backups
+# description: deletes all backups older than the specified time
+delete_old_backups ()
+{
+  local script_location=$(dirname "$0")  # get the location of the script 
+  local backups=$(ls $script_location/*._createbackup.*.txt) # get the list of backups
+
+  # iterate over all the backups 
+  for backup in $backups;
+  do
+    local backup_time=$(echo $backup | sed -e 's|.*\._createbackup\.||g' -e 's|\.txt||g') # get the time of the backup
+    local current_time=$(date +%s) # get the current time
+    local time_difference=$((current_time - backup_time)) # get the difference between the current time and the backup time
+
+    # delete the backup if it is older than the specified time
+    if [[ "$time_difference" -gt "$delete_backups_older_than" ]]; then
+      rm $backup
+    fi
+  done
+}
+
 # TODO: flags support using getopts
   # flags: 
     # -h for help, 
@@ -161,6 +182,7 @@ EOF
 preffered_editor="code" # where we will store the preferred editor
 delete_backups_older_than=$((60*60*24*7)) # backups older than [1 week] get deleted 
 today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+delete_old_backups # purge old unneeded backup files from the script directory
 
 # parse the flags using getopts, exit after every flag
 # check that only one flag was provided
