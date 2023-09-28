@@ -243,7 +243,7 @@ sed -i"._createbackup.$(date +%s).txt" "s|_title_|$title|g" $filename
 sed -i"._createbackup.$(date +%s).txt" "s|_description_|$description|g" "$filename"
 sed -i"._createbackup.$(date +%s).txt" "s|_user_|$USER|g" "$filename"
 sed -i"._createbackup.$(date +%s).txt" "s|_date_|$today|g" "$filename"
-sed -i"._createbackup.$(date +%s).txt" +%s).txt" "s|_last_modified_|$today|g" "$filename"
+sed -i"._createbackup.$(date +%s).txt" "s|_last_modified_|$today|g" "$filename"
 
 # open the file in the editor
 $preffered_editor "$filename"
