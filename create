@@ -147,6 +147,45 @@ EOF
 
 }
 
+# name: delete_template
+# description: delete template files 
+delete_template ()
+{
+  local script_location=$(dirname "$0")  # get the location of the script 
+  local templates=$(ls $script_location/template_*.txt) # get the list of templates
+
+  echo "What language do you want to delete the files of?"
+  echo "Available templates:"
+  for template in $templates;
+  do
+    echo " - $(basename $template | sed -e 's|template_||g' -e 's|\.txt||g')"
+  done
+
+  # get the file suffix input, and keep asking for it until it passes the validation
+  local suffix=""
+  local filename="" # the name of the template file, for opening in the editor
+  local script_location=$(dirname "$0")  # get the location of the script 
+  local file_exists=false # flag to check if the file already exists
+
+  while [[ -z "$suffix" ]];
+  do
+    echo "" # whitespace for separation
+    read -p "Enter the file suffix of the template you want to delete: " suffix # get the file suffix
+
+    # validation
+    [[ -z "$suffix" ]] && echo "Error: No file suffix provided" # check that a suffix was entered
+    [[ $suffix == .* ]] && suffix="${suffix:1}" # remove the leading full stop if it exists
+    [[ -f "$script_location/template_$suffix.txt" ]] || echo "Error: No template found matching your entry."  
+    [[ -z "$filename" ]] && filename="template_$suffix.txt" # set the filename if it hasn't been set yet
+  done
+
+  # delete the file that we want to 
+  rm ${script_location}/${filename}
+  echo "${filename} deleted."
+  exit 0
+
+}
+
 # name: delete_old_backups
 # description: deletes all backups older than the specified time
 delete_old_backups ()
@@ -194,7 +233,7 @@ if [[ "$OPTIND" -gt 2 ]]; then
   exit 1
 fi
 
-while getopts :hple:t name;
+while getopts :hplxe:t name;
 do
   case $name in
     h)
@@ -208,6 +247,10 @@ do
       ;;
     l)
       list_templates
+      exit
+      ;;
+    x)
+      delete_template
       exit
       ;;
     e)
