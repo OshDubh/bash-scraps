@@ -1,0 +1,8 @@
+#!/bin/bash 
+
+# Filename: ghcix
+# Description: Launches the ghcci compiler with the last edited haskell file as the source
+# Author: OshDubh
+
+last_file=$(ls -rt *.hs | tail -1)
+ghci $last_file
