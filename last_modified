@@ -36,14 +36,21 @@ program ()
     line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
     [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit
 
-    today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
-    sed -i "s|${line}.*$|${line}${today}|" $file # replace the last modified time with the current last modified info
-}
+    # only modify if it changes 
+    last_modified_time=$(date -r "$file" +%s)
+    while true
+    do
+        current_time=$(date -r "$file" +%s) # keep checking if it was modified
+        if [ "$last_modified_time" -ne "$current_time" ]
+        then
+            today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+            sed -i '' "s|${line}.*$|${line}${today}|" $file  # replace the last modified time with the current last modified info
+            last_modified_time=$current_time # update the time 
+        fi
 
-# # execute this program when a file changes
-while true;
-do
-    watch -d -t -g ls -lR && program
-done
+        sleep 60 # only execute every minute 
+    done
+
+}
 
 program
