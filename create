@@ -276,6 +276,7 @@ shift $(($OPTIND -1))
 filename="$1" # the filename, including suffix
 language=$(echo $filename | sed -e 's|^\(.*\.\)||g') # the file suffix (everything after the ".")
 title=$(echo $filename | sed -e 's|\.[^.]*$||g') # the filename without the suffix or the "."
+capital_title=$(tr '[:lower:]' '[:upper:]' <<< ${title:0:1})${title:1} # the title with the first letter capitalized
 description="$2" # the description of the file
 
 touch "$filename" # create the file
@@ -288,6 +289,10 @@ sed -i"._createbackup.$(date +%s).txt" "s|_description_|$description|g" "$filena
 sed -i"._createbackup.$(date +%s).txt" "s|_user_|$USER|g" "$filename"
 sed -i"._createbackup.$(date +%s).txt" "s|_date_|$today|g" "$filename"
 sed -i"._createbackup.$(date +%s).txt" "s|_last_modified_|$today|g" "$filename"
+sed -i"._createbackup.$(date +%s).txt" "s|_capitaltitle_|$capital_title|g" "$filename"
+
+# move all the backup files to the same folder the script is in 
+mv ./*._createbackup.*.txt $(dirname "$0")
 
 # open the file in the editor
 $preffered_editor "$filename"
