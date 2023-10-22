@@ -4,11 +4,11 @@
 # Description: Changes the "last modified" line in a file whenever it is saved
 # Author: OshDubh
 
-# function name: get_day_suffix
-# description: returns the suffix for the current day number
-get_day_suffix ()
-{
-  local day=$(date +%d) # get the day number
+# function name: get_date_time
+# description: Takes a file and returns the full desired date format
+get_date_time () {
+  local input_file="$1" # get save the file name
+  local day=$(date -r $input_file +%d) # get the day number from the timestamp
   local suffix="th" # default suffix
 
   # change for special cases
@@ -20,7 +20,7 @@ get_day_suffix ()
     esac
   fi
 
-  echo $suffix # return the suffix
+  echo $(date -r $input_file +"%R on %A, the %d$suffix of %B, %Y.")
 }
 
 # funciton name: program
@@ -30,27 +30,25 @@ program ()
     # get the info we need
     file="$(ls -t | head -n 1)"  # get the last modified file
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
-    script_location=$(dirname "$0")  # get the location of the script 
+    script_location=$(dirname "$0")  # get the location of the script
+
+    # exit if there is no template for the file
     [[ -f "$script_location/template_$suffix.txt" ]] || echo "No template exists for the last modified file." || exit
 
+    # intelligently get what line we need to modify from the template
     line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
-    [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit
+    [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit # exit if there is no _last_modified_ line
 
-    # only modify if it changes 
-    last_modified_time=$(date -r "$file" +%s)
-    while true
-    do
-        current_time=$(date -r "$file" +%s) # keep checking if it was modified
-        if [ "$last_modified_time" -ne "$current_time" ]
-        then
-            today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
-            sed -i '' "s|${line}.*$|${line}${today}|" $file  # replace the last modified time with the current last modified info
-            last_modified_time=$current_time # update the time 
-        fi
+    # only modify the line if the current line is older than the one derived from the modification time of the file
+    current_last_modified_line=$(cat "$file" | grep "$line") # get the current last modified line that exists in the file
+    new_last_modified_line="$line$(get_date_time $file)" # what the line should say
 
-        sleep 60 # only execute every minute 
-    done
-
+    # replace the line if they're not equal
+    [[ "$current_last_modified_line" != "$new_last_modified_line" ]] && sed -i"._lmbackup.$(date +%s).txt" "s|$current_last_modified_line|$new_last_modified_line|" "$file" && mv ./*._lmbackup.*.txt $(dirname "$0")
 }
 
-program
+while true;
+do
+    program
+    sleep 60 # we only care about accuracy within a degree of a minute
+done
