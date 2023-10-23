@@ -1,0 +1,13 @@
+/*     Filename: _filename_
+    Description: _description_
+     Created by: _user_
+             at: _date_
+    Last edited: _last_modified_ */
+
+package main
+
+import "fmt"
+
+func main() {
+    
+}
