@@ -1,0 +1,4 @@
+#!/bin/bash
+
+file=$(ls -t | grep .go | head -1)
+go run $file
