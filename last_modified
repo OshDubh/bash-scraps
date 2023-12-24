@@ -28,7 +28,8 @@ get_date_time () {
 program ()
 {
     # get the info we need
-    file="$(ls -t | head -n 1)"  # get the last modified file
+    file="$1" 
+    echo "watching: $file"
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
     script_location=$(dirname "$0")  # get the location of the script
 
@@ -47,8 +48,10 @@ program ()
     [[ "$current_last_modified_line" != "$new_last_modified_line" ]] && sed -i"._lmbackup.$(date +%s).txt" "s|$current_last_modified_line|$new_last_modified_line|" "$file" && mv ./*._lmbackup.*.txt $(dirname "$0")
 }
 
+input_file="$1" # get the file from the cli
+[[ -z "$input_file" ]] && input_file=$(ls -t | head -n 1) # get the last modified file if none is given
 while true;
 do
-    program
+    program $input_file
     sleep 60 # we only care about accuracy within a degree of a minute
 done
