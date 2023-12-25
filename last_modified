@@ -53,18 +53,58 @@ program ()
     fi
 }
 
-input_file="$1" # get the file from the cli
-[[ -z "$input_file" ]] && input_file=$(ls -t | head -n 1) # get the last modified file if none is given
-echo "watching: $input_file"
+# name: get_last_compatable_file
+# description: gets the most recently modified file that has a template
+get_last_compatable_file ()
+{
+  local script_location=$(dirname "$0") # get the location of the script
+  local suffixes=$(ls "$script_location" | grep "template_" | sed -e 's|template_||g' -e 's|\.txt||g') # get all the suffixes of the templates
+  local last_modified=$(ls -t | head -n 1) # get the most recently modified file
+  local last_modified_suffix=$(echo $last_modified | sed -e 's|^\(.*\.\)||g') # get the suffix of the most recently modified file
 
-modified=$(date -r $input_file +%s)
+  # go over the files in order of modification and return the first one that has a template
+  for file in $(ls -t)
+  do
+    for suffix in $suffixes
+    do
+      [[ "$suffix" == "$(echo $file | sed -e 's|^\(.*\.\)||g')" ]] && echo "$file" && return
+    done
+  done
+}
+
+# input_file="$1" # get the file from the cli
+# [[ -z "$input_file" ]] && file_flag=1 # if there is no file, set the flag
+# [[ "$file_flag" -eq 1 ]] && input_file=$(ls -t | head -n 1) # if there is no file, get the most recently modified file
+# echo "watching: $input_file"
+
+# modified=$(date -r $input_file +%s)
+
+# while true;
+# do
+#   if [[ "$modified" -ne $(date -r $input_file +%s) ]];
+#   then
+#     program "$input_file"
+#   fi
+#   modified=$(date -r $input_file +%s)
+#   [[ "$file_flag" -eq 1 ]] && input_file=$(ls -t | head -n 1) && echo "watching: $input_file"
+#   sleep 1
+# done
+
+file=$(get_last_compatable_file)
+echo "watching: $file"
+modified=$(date -r $file +%s)
 
 while true;
 do
-  if [[ "$modified" -ne $(date -r $input_file +%s) ]];
+  recheck=$(get_last_compatable_file)
+  [[ "$file" != "$recheck" ]] && file=$recheck && echo "watching: $file"
+
+  if [[ "$modified" -ne $(date -r $file +%s) ]];
   then
-    program "$input_file"
+    program $file
   fi
-  modified=$(date -r $input_file +%s)
+
+  modified=$(date -r $file +%s)
   sleep 1
 done
+  
