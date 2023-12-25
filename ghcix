@@ -5,4 +5,7 @@
 # Author: OshDubh
 
 last_file=$(ls -rt *.hs | tail -1)
-ghci $last_file
+ghc -o ${last_file%.*} $last_file
+./${last_file%.*}
+
+rm $last_file.o $lastfile.hi
