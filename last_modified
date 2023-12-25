@@ -57,8 +57,14 @@ input_file="$1" # get the file from the cli
 [[ -z "$input_file" ]] && input_file=$(ls -t | head -n 1) # get the last modified file if none is given
 echo "watching: $input_file"
 
+modified=$(date -r $input_file +%s)
+
 while true;
 do
-    program $input_file
-    sleep 60 # we only care about accuracy within a degree of a minute
+  if [[ "$modified" -ne $(date -r $input_file +%s) ]];
+  then
+    program "$input_file"
+  fi
+  modified=$(date -r $input_file +%s)
+  sleep 1
 done
