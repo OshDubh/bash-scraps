@@ -31,7 +31,6 @@ program ()
     file="$1" 
     
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
-    script_location=$(dirname "$0")  # get the location of the script
 
     # exit if there is no template for the file
     [[ -f "$script_location/template_$suffix.txt" ]] || echo "No template exists for the last modified file." || exit
@@ -49,7 +48,7 @@ program ()
     then
       sed -i"._lmbackup.$(date +%s).txt" "s|$current_last_modified_line|$new_last_modified_line|" "$file"
       mv ./*._lmbackup.*.txt $(dirname "$0")
-      echo "updated $file to $new_last_modified_line"
+      echo "[`date +%Y-%m-%d` `date +%H:%M`] updated: $file" | tee -a $script_location/last_modified.log
     fi
 }
 
@@ -72,32 +71,15 @@ get_last_compatable_file ()
   done
 }
 
-# input_file="$1" # get the file from the cli
-# [[ -z "$input_file" ]] && file_flag=1 # if there is no file, set the flag
-# [[ "$file_flag" -eq 1 ]] && input_file=$(ls -t | head -n 1) # if there is no file, get the most recently modified file
-# echo "watching: $input_file"
-
-# modified=$(date -r $input_file +%s)
-
-# while true;
-# do
-#   if [[ "$modified" -ne $(date -r $input_file +%s) ]];
-#   then
-#     program "$input_file"
-#   fi
-#   modified=$(date -r $input_file +%s)
-#   [[ "$file_flag" -eq 1 ]] && input_file=$(ls -t | head -n 1) && echo "watching: $input_file"
-#   sleep 1
-# done
-
+script_location=$(dirname "$0") # get the location of the script
 file=$(get_last_compatable_file)
-echo "watching: $file"
+echo "[`date +%Y-%m-%d` `date +%H:%M`] started: $file" | tee -a $script_location/last_modified.log
 modified=$(date -r $file +%s)
 
 while true;
 do
   recheck=$(get_last_compatable_file)
-  [[ "$file" != "$recheck" ]] && file=$recheck && echo "watching: $file"
+  [[ "$file" != "$recheck" ]] && file=$recheck && echo "[`date +%Y-%m-%d` `date +%H:%M`] watching: $file" | tee -a $script_location/last_modified.log
 
   if [[ "$modified" -ne $(date -r $file +%s) ]];
   then
