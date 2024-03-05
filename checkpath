@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Get the current directory
+current_dir=$(pwd)
+
+# Convert PATH into an array of directories
+IFS=':' read -ra dirs_in_path <<< "$PATH"
+
+# Check if current directory is in PATH
+for dir in "${dirs_in_path[@]}"; do
+    if [ "$dir" = "$current_dir" ]; then
+        echo "Current directory is in the PATH"
+        exit 0
+    fi
+done
+
+echo "Current directory is not in the PATH"
