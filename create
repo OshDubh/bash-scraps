@@ -277,6 +277,8 @@ filename="$1" # the filename, including suffix
 language=$(echo $filename | sed -e 's|^\(.*\.\)||g') # the file suffix (everything after the ".")
 title=$(echo $filename | sed -e 's|\.[^.]*$||g') # the filename without the suffix or the "."
 capital_title=$(tr '[:lower:]' '[:upper:]' <<< ${title:0:1})${title:1} # the title with the first letter capitalized
+# if the filename has a -, make the word after it have a capital first letter and remove the dash
+[[ "$capital_title" == *-* ]] && capital_title=$(echo $capital_title | awk 'BEGIN{FS=OFS="-"} {for(i=2; i<=NF; i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' | sed 's|-||g')
 description="$2" # the description of the file
 
 touch "$filename" # create the file
