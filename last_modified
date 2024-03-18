@@ -28,17 +28,17 @@ get_date_time () {
 program ()
 {
     # get the info we need
+    local script_location=$(dirname "$0") # get the location of the script
     file="$1" 
     
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
-    script_location=$(dirname "$0")  # get the location of the script
 
     # exit if there is no template for the file
-    [[ -f "$script_location/template_$suffix.txt" ]] || echo "No template exists for the last modified file." || exit
+    [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." || exit
 
     # intelligently get what line we need to modify from the template
     line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
-    [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit # exit if there is no _last_modified_ line
+    [[ -z "$line" ]] && log "\033[31merror:\033[0m the template for the last modified file does not have a _last_modified_ line." && exit # exit if there is no _last_modified_ line
 
     # only modify the line if the current line is older than the one derived from the modification time of the file
     current_last_modified_line=$(cat "$file" | grep "$line") # get the current last modified line that exists in the file
@@ -49,8 +49,17 @@ program ()
     then
       sed -i"._lmbackup.$(date +%s).txt" "s|$current_last_modified_line|$new_last_modified_line|" "$file"
       mv ./*._lmbackup.*.txt $(dirname "$0")
-      echo "updated $file to $new_last_modified_line"
+      log "updated \033[34m$file\033[0m"
     fi
+}
+
+# name: log
+# logs the provided string to the function
+log ()
+{
+  local script_location=$(dirname "$0") # get the location of the script
+  echo -e "\033[30m[`date +%Y-%m-%d` `date +%H:%M`]\033[0m $1" # log to the terminal
+  echo -e "[`date +%Y-%m-%d` `date +%H:%M`] $1" | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" >> $script_location/last_modified.log # log without the color codes
 }
 
 # name: get_last_compatable_file
@@ -72,32 +81,15 @@ get_last_compatable_file ()
   done
 }
 
-# input_file="$1" # get the file from the cli
-# [[ -z "$input_file" ]] && file_flag=1 # if there is no file, set the flag
-# [[ "$file_flag" -eq 1 ]] && input_file=$(ls -t | head -n 1) # if there is no file, get the most recently modified file
-# echo "watching: $input_file"
-
-# modified=$(date -r $input_file +%s)
-
-# while true;
-# do
-#   if [[ "$modified" -ne $(date -r $input_file +%s) ]];
-#   then
-#     program "$input_file"
-#   fi
-#   modified=$(date -r $input_file +%s)
-#   [[ "$file_flag" -eq 1 ]] && input_file=$(ls -t | head -n 1) && echo "watching: $input_file"
-#   sleep 1
-# done
-
+script_location=$(dirname "$0") # get the location of the script
 file=$(get_last_compatable_file)
-echo "watching: $file"
+log "started watching \033[34m$file\033[0m"
 modified=$(date -r $file +%s)
 
 while true;
 do
   recheck=$(get_last_compatable_file)
-  [[ "$file" != "$recheck" ]] && file=$recheck && echo "watching: $file"
+  [[ "$file" != "$recheck" ]] && file=$recheck && log "switched to \033[34m$file\033[0m"
 
   if [[ "$modified" -ne $(date -r $file +%s) ]];
   then
@@ -107,4 +99,3 @@ do
   modified=$(date -r $file +%s)
   sleep 1
 done
-  
