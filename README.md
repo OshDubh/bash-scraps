@@ -17,3 +17,5 @@ A collection of bash scripts to make life easier
 `jccx` compiles and executes the last java file edited.
 
 `last_modified` updates the last edited file you created to change the "Last modified" line. 
+
+`checkpath` tells you if the current directory is on the PATH
