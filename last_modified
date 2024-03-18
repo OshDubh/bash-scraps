@@ -34,11 +34,11 @@ program ()
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
 
     # exit if there is no template for the file
-    [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." || exit
+    [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." && exit 1
 
     # intelligently get what line we need to modify from the template
     line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
-    [[ -z "$line" ]] && log "\033[31merror:\033[0m the template for the last modified file does not have a _last_modified_ line." && exit # exit if there is no _last_modified_ line
+    [[ -z "$line" ]] && log "\033[31merror:\033[0m the template for the last modified file does not have a _last_modified_ line." && exit 1 # exit if there is no _last_modified_ line
 
     # only modify the line if the current line is older than the one derived from the modification time of the file
     current_last_modified_line=$(cat "$file" | grep "$line") # get the current last modified line that exists in the file
@@ -47,8 +47,7 @@ program ()
     # replace the line if they're not equal
     if [[ "$current_last_modified_line" != "$new_last_modified_line" ]]
     then
-      sed -i"._lmbackup.$(date +%s).txt" "s|$current_last_modified_line|$new_last_modified_line|" "$file"
-      mv ./*._lmbackup.*.txt $(dirname "$0")
+      sed -i.bak "s|$current_last_modified_line|$new_last_modified_line|" "$file"
       log "updated \033[34m$file\033[0m"
     fi
 }
