@@ -28,16 +28,17 @@ get_date_time () {
 program ()
 {
     # get the info we need
+    local script_location=$(dirname "$0") # get the location of the script
     file="$1" 
     
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
 
     # exit if there is no template for the file
-    [[ -f "$script_location/template_$suffix.txt" ]] || echo "No template exists for the last modified file." || exit
+    [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." && exit 1
 
     # intelligently get what line we need to modify from the template
     line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
-    [[ -z "$line" ]] && echo "The template for the last modified file does not have a _last_modified_ line." && exit # exit if there is no _last_modified_ line
+    [[ -z "$line" ]] && log "\033[31merror:\033[0m the template for the last modified file does not have a _last_modified_ line." && exit 1 # exit if there is no _last_modified_ line
 
     # only modify the line if the current line is older than the one derived from the modification time of the file
     current_last_modified_line=$(cat "$file" | grep "$line") # get the current last modified line that exists in the file
@@ -46,10 +47,18 @@ program ()
     # replace the line if they're not equal
     if [[ "$current_last_modified_line" != "$new_last_modified_line" ]]
     then
-      sed -i"._lmbackup.$(date +%s).txt" "s|$current_last_modified_line|$new_last_modified_line|" "$file"
-      mv ./*._lmbackup.*.txt $(dirname "$0")
-      echo "[`date +%Y-%m-%d` `date +%H:%M`] updated: $file" | tee -a $script_location/last_modified.log
+      sed -i.bak "s|$current_last_modified_line|$new_last_modified_line|" "$file"
+      log "updated \033[34m$file\033[0m"
     fi
+}
+
+# name: log
+# logs the provided string to the function
+log ()
+{
+  local script_location=$(dirname "$0") # get the location of the script
+  echo -e "\033[30m[`date +%Y-%m-%d` `date +%H:%M`]\033[0m $1" # log to the terminal
+  echo -e "[`date +%Y-%m-%d` `date +%H:%M`] $1" | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" >> $script_location/last_modified.log # log without the color codes
 }
 
 # name: get_last_compatable_file
@@ -73,13 +82,13 @@ get_last_compatable_file ()
 
 script_location=$(dirname "$0") # get the location of the script
 file=$(get_last_compatable_file)
-echo "[`date +%Y-%m-%d` `date +%H:%M`] started: $file" | tee -a $script_location/last_modified.log
+log "started watching \033[34m$file\033[0m"
 modified=$(date -r $file +%s)
 
 while true;
 do
   recheck=$(get_last_compatable_file)
-  [[ "$file" != "$recheck" ]] && file=$recheck && echo "[`date +%Y-%m-%d` `date +%H:%M`] watching: $file" | tee -a $script_location/last_modified.log
+  [[ "$file" != "$recheck" ]] && file=$recheck && log "switched to \033[34m$file\033[0m"
 
   if [[ "$modified" -ne $(date -r $file +%s) ]];
   then
@@ -89,4 +98,3 @@ do
   modified=$(date -r $file +%s)
   sleep 1
 done
-  

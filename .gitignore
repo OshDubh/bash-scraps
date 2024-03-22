@@ -2,3 +2,4 @@ old/*
 *._createbackup*
 *._lmbackup*
 *.log
+**/test/*
