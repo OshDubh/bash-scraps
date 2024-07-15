@@ -1,6 +1,6 @@
 #!/bin/sh
 
-last_file=$(ls ./ -rt | tail -1)
+last_file=$(ls -t *.c | head -n 1)
 trimmed_file=$(echo $last_file | sed 's|\.c||g')
 
 gcc -o "$trimmed_file" "$last_file"
