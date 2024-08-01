@@ -34,7 +34,7 @@ program ()
     suffix=$(echo $file | sed -e 's|^\(.*\.\)||g')  # get the last modified file's file extension
 
     # exit if there is no template for the file
-    [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." && exit 1
+    [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." || exit
 
     # intelligently get what line we need to modify from the template
     line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
