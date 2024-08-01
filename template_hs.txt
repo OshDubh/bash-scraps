@@ -1,5 +1,15 @@
--- Filename: _filename_
--- Description: _description_
--- Author: _user_
--- Date created: _date_
--- Last modified: _last_modified_
+{- |
+Module      : _title_
+Description : _description_
+Copyright   : (c) _user_, _date_
+License     : BSD-3
+Stability   : experimental
+Portability : POSIX
+
+Last updated: _last_modified_
+-}
+
+-- | The entry point for the program
+main :: IO ()
+main = do
+    putStrLn ("hello world!")
