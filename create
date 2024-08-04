@@ -97,8 +97,10 @@ create_template ()
 
   [[ $file_exists == true ]] && $preffered_editor "$script_location/template_$suffix.txt" && exit 0 # open the existing template if it exists
 
+  tempfile=$(mktemp -p "$script_location" "createtemp.XXXXXX") || { echo "error creating tmpfile"; exit 1; } # create a temporary file for the user to create the template with
+  
   # create the new template and paste all template lines into it, below
-  cat << EOF >> "$script_location/template_$suffix.txt"
+  cat << EOF >> "$tempfile"
 Welcome to create's template creator. 
 Just add content below the #'s to create a new template. This header text will be removed after you close the file.
 
@@ -112,7 +114,7 @@ _date_          : will be replaced by the date the file was created, e.g. "09:41
 _last_modified_ : will be replaced by the date the file was last modified if create was run with the flag to update dates live.
 
 
-Possible example for a python file:
+An example a python file:
 
 # Filename: _filename_
 # Title: _title_
@@ -129,22 +131,20 @@ if __name__ == "__main__":
 ### end of template ###
 EOF
 
-  $preffered_editor "$script_location/template_$suffix.txt" # open the template in the editor
+  local created_time=$(stat -f %m "$tempfile" 2>/dev/null || stat -c %T "$tempfile") # || to work with the GNU and BSD counterparts
+  $preffered_editor "$tempfile" # open the template in the editor
 
-  # wait for the file to be saved by checking the modification time
-  echo "Waiting for the template file to be saved before continuing..."
-  local last_modified=$(date -r "$script_location/template_$suffix.txt" +%s)
-  local current_time=$(date +%s)
-  while [[ "$last_modified" -eq "$current_time" ]];
+  echo "Waiting for the file to be saved before continuing"
+  local current_time=$(stat -f %m "$tempfile" 2>/dev/null || stat -c %Y "$tempfile")
+  while [[ "$created_time" -eq "$current_time" ]];
   do
     sleep 1
-    last_modified=$(date -r "$script_location/template_$suffix.txt" +%s)
+    current_time=$(stat -f %m "$tempfile" 2>/dev/null || stat -c %Y "$tempfile")
   done
 
-  # remove the header text, starting at line one and ending at the line that matches, deleting the entire range
-  sed -i"._createbackup.$(date -r "$script_location/template_$suffix.txt" +%s).txt.$(date -r "$script_location/template_$suffix.txt" +%s)" '1,/### end of template ###/d' "$script_location/template_$suffix.txt"
+  sed '1,/### end of template ###/d' "$tempfile" > $script_location/template_$suffix.txt
+  rm $tempfile
   echo "Template created successfully!" 
-
 }
 
 # name: delete_template
