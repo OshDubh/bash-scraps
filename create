@@ -220,7 +220,10 @@ delete_old_backups ()
     # see usermod for a good example on how it should look
   # specify which template to use
 
-preffered_editor="code" # where we will store the preferred editor
+preffered_editor="vi" # the default editor to use if $VISUAL and $EDITOR are not set
+[[ -n "$VISUAL" ]] && preffered_editor=$VISUAL
+[[ -n "$EDITOR" ]] && preferred_editor=$EDITOR
+
 delete_backups_older_than=$((60*60*24*7)) # backups older than [1 week] get deleted 
 today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
 delete_old_backups # purge old unneeded backup files from the script directory
@@ -298,3 +301,4 @@ mv ./*._createbackup.*.txt $(dirname "$0")
 
 # open the file in the editor
 $preffered_editor "$filename"
+
