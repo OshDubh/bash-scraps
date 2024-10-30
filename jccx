@@ -1,5 +1,7 @@
 #!/bin/sh
 
-last_file=$(ls ./ -rt | tail -1)
+last_file=$(ls -t *.java | head -n 1)
+trimmed_file=$(echo $last_file | sed 's|\.java||g')
 
 java $last_file
+./"$trimmed_file" "$@"
