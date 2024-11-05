@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# load 
+mode=$1
+count=$2
+file=$3
+
+# set defaults
+[[ -z "$mode" ]] && mode="head"
+[[ -z "$count" ]] && count=10
+[[ -z "$file" ]] && file=$(ls -t *.csv *.tsv 2>/dev/null | head -n 1)
+[[ "$file" == *.tsv ]] && delim=$'\t' || delim=','
+
+# run the command
+head -n $count $file | column -t -s"$delim"
