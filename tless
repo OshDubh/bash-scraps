@@ -1,0 +1,3 @@
+#!/bin/bash
+
+tldr $1 | less

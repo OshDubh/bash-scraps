@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Function to convert a single character to its emoji equivalent
+convert_char() {
+    case $1 in
+        [A-Z]) echo ":p${1,,}:" ;;  # Convert uppercase to lowercase
+        [a-z]) echo ":p$1:" ;;
+        0) echo ":p0:" ;;
+        1) echo ":p1~1:" ;;
+        2) echo ":p2~1:" ;;
+        3) echo ":p3~1:" ;;
+        4) echo ":p4:" ;;
+        5) echo ":p5:" ;;
+        6) echo ":p6:" ;;
+        7) echo ":p7:" ;;
+        8) echo ":p8:" ;;
+        9) echo ":p9:" ;;
+        '!') echo ":pzz1:" ;;
+        ')') echo ":pzz10:" ;;
+        '-') echo ":pzz11:" ;;
+        '+') echo ":pzz13:" ;;
+        '#') echo ":pzz14:" ;;
+        '{') echo ":pzz15:" ;;
+        '}') echo ":pzz16:" ;;
+        '[') echo ":pzz17:" ;;
+        ']') echo ":pzz18:" ;;
+        '?') echo ":pzz19:" ;;
+        '"') echo ":pzz20:" ;;
+        '.') echo ":pzz21:" ;;
+        ',') echo ":pzz22:" ;;
+        '<') echo ":pzz23:" ;;
+        '>') echo ":pzz24:" ;;
+        '$') echo ":pzz25:" ;;
+        '$') echo ":pzz26:" ;;
+        '%') echo ":pzz27:" ;;
+        '~') echo ":pzz28:" ;;
+        '&') echo ":pzz29:" ;;
+        ' ') echo ":zzblank:" ;;
+        *) echo "$1" ;;  # Return unchanged if no match
+    esac
+}
+
+# Convert input string character by character
+result=""
+input="$1"
+[[ -z "$input" ]] && input=$(pbpaste)
+
+for (( i=0; i<${#input}; i++ )); do
+    char="${input:$i:1}"
+    result+="$(convert_char "$char")"
+done
+
+# Copy to clipboard using pbcopy
+echo -n "$result" | pbcopy
+
+echo "Converted text copied to clipboard!"
+echo "Result: $result"
