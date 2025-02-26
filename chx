@@ -2,4 +2,4 @@
 
 last_file=$(ls -t | head -n 1)
 [[ ! -x "$last_file" ]]; chmod +x $last_file
-$last_file
+./$last_file
