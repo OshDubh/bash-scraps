@@ -280,7 +280,8 @@ shift $(($OPTIND -1))
 [[ -z "$1" ]] && show_help_message # echo the help if no arguments are given
 
 # extract the file details from the arguments
-filename="$1" # the filename, including suffix
+filename=$(basename $1) # the filename, including suffix
+filepath=$(dirname $1) # get the directory we want to create the file in
 language=$(echo $filename | sed -e 's|^\(.*\.\)||g') # the file suffix (everything after the ".")
 title=$(echo $filename | sed -e 's|\.[^.]*$||g') # the filename without the suffix or the "."
 capital_title=$(tr '[:lower:]' '[:upper:]' <<< ${title:0:1})${title:1} # the title with the first letter capitalized
@@ -288,6 +289,8 @@ capital_title=$(tr '[:lower:]' '[:upper:]' <<< ${title:0:1})${title:1} # the tit
 [[ "$capital_title" == *-* ]] && capital_title=$(echo $capital_title | awk 'BEGIN{FS=OFS="-"} {for(i=2; i<=NF; i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' | sed 's|-||g')
 description="$2" # the description of the file
 
+mkdir -p "$filepath" > /dev/null # create the directory if it doesn't exist
+cd $filepath
 touch "$filename" # create the file
 cat ~/bin/template_${language}.txt >> $filename # append the right template to the file
 
@@ -300,8 +303,7 @@ sed -i"._createbackup.$(date +%s).txt" "s|_date_|$today|g" "$filename"
 sed -i"._createbackup.$(date +%s).txt" "s|_last_modified_|$today|g" "$filename"
 sed -i"._createbackup.$(date +%s).txt" "s|_capitaltitle_|$capital_title|g" "$filename"
 
-# move all the backup files to the same folder the script is in 
-mv ./*._createbackup.*.txt $(dirname "$0")
+rm *._createbackup.*
 
 # open the file in the editor if desired
 [[ -z $no_open ]] && $preferred_editor "$filename"
