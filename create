@@ -21,6 +21,7 @@ Options:
   -l    List the available templates.
   -t    Create a new template.
   -c    Configure the script.
+  -n    No-open, do not open the file after creation.
 
 Examples:
   create myscript.py
@@ -95,7 +96,7 @@ create_template ()
     [[ -z "$filename" ]] && filename="template_$suffix.txt" # set the filename if it hasn't been set yet
   done
 
-  [[ $file_exists == true ]] && $preffered_editor "$script_location/template_$suffix.txt" && exit 0 # open the existing template if it exists
+  [[ $file_exists == true ]] && $preferred_editor "$script_location/template_$suffix.txt" && exit 0 # open the existing template if it exists
 
   tempfile=$(mktemp -p "$script_location" "createtemp.XXXXXX") || { echo "error creating tmpfile"; exit 1; } # create a temporary file for the user to create the template with
   
@@ -132,7 +133,7 @@ if __name__ == "__main__":
 EOF
 
   local created_time=$(stat -f %m "$tempfile" 2>/dev/null || stat -c %T "$tempfile") # || to work with the GNU and BSD counterparts
-  $preffered_editor "$tempfile" # open the template in the editor
+  $preferred_editor "$tempfile" # open the template in the editor
 
   echo "Waiting for the file to be saved before continuing"
   local current_time=$(stat -f %m "$tempfile" 2>/dev/null || stat -c %Y "$tempfile")
@@ -220,9 +221,9 @@ delete_old_backups ()
     # see usermod for a good example on how it should look
   # specify which template to use
 
-preffered_editor="vi" # the default editor to use if $VISUAL and $EDITOR are not set
-[[ -n "$VISUAL" ]] && preffered_editor=$VISUAL
-[[ -n "$EDITOR" ]] && preferred_editor=$EDITOR
+preferred_editor="nano" # the default editor to use if $VISUAL and $EDITOR are not set
+[[ ! -z "$VISUAL" ]] && preferred_editor=$VISUAL;
+[[ ! -z "$EDITOR" ]] && preferred_editor=$EDITOR;
 
 delete_backups_older_than=$((60*60*24*7)) # backups older than [1 week] get deleted 
 today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
@@ -236,7 +237,7 @@ if [[ "$OPTIND" -gt 2 ]]; then
   exit 1
 fi
 
-while getopts :hplxe:t name;
+while getopts :hplxe:tn name;
 do
   case $name in
     h)
@@ -263,6 +264,9 @@ do
     t)
       create_template
       exit
+      ;;
+    n)
+      no_open=1
       ;;
     *)
       echo "Error: unrecognized option -$opt" >&2
@@ -299,6 +303,6 @@ sed -i"._createbackup.$(date +%s).txt" "s|_capitaltitle_|$capital_title|g" "$fil
 # move all the backup files to the same folder the script is in 
 mv ./*._createbackup.*.txt $(dirname "$0")
 
-# open the file in the editor
-$preffered_editor "$filename"
+# open the file in the editor if desired
+[[ -z $no_open ]] && $preferred_editor "$filename"
 
