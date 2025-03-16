@@ -4,7 +4,8 @@
 convert_char() {
     case $1 in
         [A-Z]) echo ":p${1,,}:" ;;  # Convert uppercase to lowercase
-        [a-z]) echo ":p$1:" ;;
+        [a-oq-z]) echo ":p$1:" ;;
+        p) echo ":pp~1:" ;;
         0) echo ":p0:" ;;
         1) echo ":p1~1:" ;;
         2) echo ":p2~1:" ;;
@@ -16,6 +17,7 @@ convert_char() {
         8) echo ":p8:" ;;
         9) echo ":p9:" ;;
         '!') echo ":pzz1:" ;;
+        '*') echo ":pzz8:" ;;
         ')') echo ":pzz10:" ;;
         '-') echo ":pzz11:" ;;
         '+') echo ":pzz13:" ;;
@@ -27,7 +29,7 @@ convert_char() {
         '?') echo ":pzz19:" ;;
         '"') echo ":pzz20:" ;;
         '.') echo ":pzz21:" ;;
-        ',') echo ":pzz22:" ;;
+        ',') echo ":pzz20:" ;;
         '<') echo ":pzz23:" ;;
         '>') echo ":pzz24:" ;;
         '$') echo ":pzz25:" ;;
@@ -35,6 +37,7 @@ convert_char() {
         '%') echo ":pzz27:" ;;
         '~') echo ":pzz28:" ;;
         '&') echo ":pzz29:" ;;
+        ':') echo ":pzz29:" ;;
         ' ') echo ":zzblank:" ;;
         *) echo "$1" ;;  # Return unchanged if no match
     esac
