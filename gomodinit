@@ -1,0 +1,16 @@
+#!/bin/bash
+project_name="$1"
+if [[ ! -z "$project_name" ]];
+then
+  mkdir -p $project_name
+  cd $project_name
+fi
+
+repo_root=$(git rev-parse --show-toplevel)
+repo_url=$(git config --get remote.origin.url)
+repo_name=$(basename -s .git "$repo_url")
+repo_owner=$(basename $(dirname "$repo_url" | sed 's|:|\/|g'))
+relative_path=${PWD#$repo_root/}
+module_path="github.com/$repo_owner/$repo_name/$relative_path"
+
+go mod init $module_path
