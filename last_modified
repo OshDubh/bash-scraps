@@ -20,7 +20,7 @@ get_date_time () {
     esac
   fi
 
-  echo $(date -r $input_file +"%R on %A, the %d$suffix of %B, %Y.")
+  echo $(date -r $input_file +"%R on %A, the %d$suffix of %B, %Y")
 }
 
 # funciton name: program
@@ -37,18 +37,27 @@ program ()
     [[ -f "$script_location/template_$suffix.txt" ]] || log "\033[31merror:\033[0m no template exists for the last modified file." || exit
 
     # intelligently get what line we need to modify from the template
-    line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_" | sed -e 's|_last_modified_||g' ) # get everything before the match in the line
-    [[ -z "$line" ]] && log "\033[31merror:\033[0m the template for the last modified file does not have a _last_modified_ line." && exit 1 # exit if there is no _last_modified_ line
+    template_line=$(cat "$script_location/template_$suffix.txt" | grep "_last_modified_") # get the full template line
+    [[ -z "$template_line" ]] && log "\033[31merror:\033[0m the template for the last modified file does not have a _last_modified_ line." && exit 1
+    line_prefix=$(echo "$template_line" | sed 's|_last_modified_.*||g') # get the bit before the _last_modified_
+    current_line=$(grep "^$line_prefix" "$file" | head -n 1) # get the line that matches the prefix
+
 
     # only modify the line if the current line is older than the one derived from the modification time of the file
     current_last_modified_line=$(cat "$file" | grep "$line") # get the current last modified line that exists in the file
     new_last_modified_line="$line$(get_date_time $file)" # what the line should say
 
-    # replace the line if they're not equal
-    if [[ "$current_last_modified_line" != "$new_last_modified_line" ]]
-    then
-      sed -i.bak "s|$current_last_modified_line|$new_last_modified_line|" "$file"
-      log "updated \033[34m$file\033[0m"
+    if [[ -n "$current_line" ]]; then
+      # build the new line
+      new_line="$template_line"
+      new_line=$(echo "$new_line" | sed "s|_last_modified_|$(get_date_time $file)|g")
+      new_line=$(echo "$new_line" | sed "s|_user_|$USER|g")
+  
+      # change the line if they're different
+      if [[ "$current_line" != "$new_line" ]]; then
+        sed -i.bak "s|$current_line|$new_line|" "$file"
+        log "updated \033[34m$file\033[0m"
+      fi
     fi
 }
 
