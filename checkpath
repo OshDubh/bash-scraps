@@ -9,9 +9,9 @@ IFS=':' read -ra dirs_in_path <<< "$PATH"
 # Check if current directory is in PATH
 for dir in "${dirs_in_path[@]}"; do
     if [ "$dir" = "$current_dir" ]; then
-        echo "Current directory is in the PATH"
+        printf "\033[1;32mCurrent directory is in the PATH\033[0m\n"
         exit 0
     fi
 done
 
-echo "Current directory is not in the PATH"
+printf "\033[1;31mCurrent directory is not in the PATH\033[0m\n"
