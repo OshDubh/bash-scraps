@@ -21,7 +21,7 @@ get_dir_diff() {
 
     while [[ "$dir" != "/" ]]; do
         if [[ "$(basename "$dir")" == *"$match"* ]]; then
-            printf ${diff%?} # less the last trailing slash
+            printf '%s' "${diff%/}" # less the last trailing slash
             return 0
         fi
         diff="$(basename $dir)/$diff"
@@ -31,4 +31,9 @@ get_dir_diff() {
     return 1
 }
 
-go mod init "$origin/$(get_dir_diff $(basename $origin))"
+subdir=$(get_dir_diff "$(basename "$origin")")
+if [[ -n "$subdir" ]]; then
+    go mod init "$origin/$subdir"
+else
+    go mod init "$origin"
+fi
