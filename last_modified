@@ -93,6 +93,34 @@ get_last_compatable_file ()
 }
 
 script_location=$(dirname "$0") # get the location of the script
+
+# Check for git hook mode (-g flag)
+if [[ "$1" == "-g" ]]; then
+  log "running in git pre-commit mode"
+  # Get all staged files
+  staged_files=$(git diff --cached --name-only)
+  
+  # Get available suffixes from templates
+  suffixes=$(ls "$script_location" | grep "template_" | sed -e 's|template_||g' -e 's|\.txt||g')
+  
+  # Process each staged file
+  for file in $staged_files; do
+    # Check if file exists and has a template
+    file_suffix=$(echo "$file" | sed -e 's|^\(.*\.\)||g')
+    for suffix in $suffixes; do
+      if [[ "$suffix" == "$file_suffix" ]] && [[ -f "$file" ]]; then
+        program "$file"
+        break
+      fi
+    done
+  done
+  
+  # Re-stage modified files
+  git add $staged_files
+  exit 0
+fi
+
+# Normal watching mode
 file=$(get_last_compatable_file)
 log "started watching \033[34m$file\033[0m"
 modified=$(date -r $file +%s)
