@@ -1,0 +1,11 @@
+#!/bin/bash
+
+wordle=$( (pbpaste 2>/dev/null || xclip -selection clipboard -o 2>/dev/null || wl-paste 2>/dev/null) )
+
+if [[ -z $wordle ]]; then
+  echo "paste wordle"
+  wordle=$(cat)
+fi
+
+echo "$wordle" | sed -e 's|🟩|:3green:|g' -e 's|🟨|:3yellow:|g' -e 's|⬛|:3grey:|g' | (pbcopy 2>/dev/null || xclip -selection clipboard 2>/dev/null || wl-copy 2>/dev/null)
+echo "copied"
