@@ -226,7 +226,7 @@ preferred_editor="nano" # the default editor to use if $VISUAL and $EDITOR are n
 [[ ! -z "$EDITOR" ]] && preferred_editor=$EDITOR;
 
 delete_backups_older_than=$((60*60*24*7)) # backups older than [1 week] get deleted 
-today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y.") # get the current date in a long format with the suffix
+today=$(date +"%R on %A, the %d`get_day_suffix` of %B, %Y") # get the current date in a long format with the suffix
 delete_old_backups # purge old unneeded backup files from the script directory
 
 # parse the flags using getopts, exit after every flag
