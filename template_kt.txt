@@ -1,0 +1,13 @@
+/*
+ * _filename_
+ * _description_
+ * created by _user_
+ * created at _date_
+ * last modified at _last_modified_
+ */
+
+package dev.osh._title_
+
+class _title_ {
+	
+}
